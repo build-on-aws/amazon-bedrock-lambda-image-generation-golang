@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Generator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        /* Spinner styling */
+        #spinner {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #ccc;
+            border-top-color: #007BFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        /* Image styling */
+        #generatedImage {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            display: none;
+        }
+        #toggleConfigBtn {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        #toggleConfigBtn:hover {
+            background-color: #0056b3;
+        }
+
+        #configSection {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GenAI image generation demo: Stable Diffusion on Amazon Bedrock with AWS Lambda and Go</h1>
+        <label for="description">Image Description:</label>
+        <input type="text" id="description" value="Painting of a ship sailing in a stormy sea, with dramatic lighting and powerful waves." onfocus="clearInput(this)">
+
+
+        <button id="toggleConfigBtn" onclick="toggleConfig()">Show Configuration</button>
+
+        <div id="configSection" style="display: none;">
+            <label for="cfg_scale">CFG Scale: 
+                <span title="Adjusts image's adherence to the prompt. Lower values increase randomness.">[?]</span>
+            </label>
+            <input type="number" id="cfg_scale" value="10">
+            
+            <label for="steps">Steps: 
+                <span title="Number of image samples. More steps enhance accuracy.">[?]</span>
+            </label>
+            <input type="number" id="steps" value="50">
+            
+            <label for="seed">Seed: 
+                <span title="Sets initial noise. Same seed with same settings replicates similar images. Defaults to random if unset.">[?]</span>
+            </label>
+            <input type="number" id="seed" value="0">
+            
+        </div>
+
+
+        <button id="generateBtn" onclick="fetchImage()">Generate Image</button>
+        <div id="spinner"></div>
+        <img id="generatedImage" alt="Generated Image">
+    </div>
+
+    <script>
+        async function fetchImage() {
+            // Clear the previous image
+            //document.getElementById('generatedImage').src = '';
+            document.getElementById('generatedImage').style.display = 'none';
+
+            // Get the values from the input fields
+            const cfgScale = document.getElementById('cfg_scale').value;
+            const seed = document.getElementById('seed').value;
+            const steps = document.getElementById('steps').value;
+
+            // Check if cfgScale and steps are within the specified constraints
+            if (cfgScale > 30) {
+                alert('CFG Scale cannot exceed 30.');
+                return;
+            }
+            if (steps > 150) {
+                alert('Steps cannot exceed 150.');
+                return;
+            }
+
+
+            const apiUrl = `ENTER_API_GATEWAY_URL?cfg_scale=${cfgScale}&seed=${seed}&steps=${steps}`;
+
+            const description = document.getElementById('description').value;
+
+            // Show spinner and disable button
+            document.getElementById('spinner').style.display = 'inline-block';
+            document.getElementById('generateBtn').disabled = true;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                },
+                body: description // Sending the description as plain text
+            });
+
+            // Hide spinner and enable button
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('generateBtn').disabled = false;
+
+            if (response.ok) {
+                const base64Image = await response.text();
+                const imageUrl = 'data:image/png;base64,' + base64Image;
+                const imageElement = document.getElementById('generatedImage');
+                imageElement.src = imageUrl;
+                imageElement.style.display = 'block'; // Show the image
+            } else {
+                alert('Failed to fetch image. Please try again.');
+            }
+
+        }
+
+        function toggleConfig() {
+            const configSection = document.getElementById('configSection');
+            const toggleBtn = document.getElementById('toggleConfigBtn');
+
+            if (configSection.style.display === "none") {
+                configSection.style.display = "block";
+                toggleBtn.textContent = "Hide Configuration";
+            } else {
+                configSection.style.display = "none";
+                toggleBtn.textContent = "Show Configuration";
+            }
+        }
+
+        function clearInput(inputElement) {
+            if (inputElement.value === "Painting of a ship sailing in a stormy sea, with dramatic lighting and powerful waves.") {
+                inputElement.value = "";
+            }
+        }
+
+    </script>
+</body>
+</html>
