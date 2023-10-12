@@ -1,5 +1,3 @@
-github.com/abhirockzz/amazon-bedrock-go-inference-params v0.0.0-20231003045841-a5985794d7ae h1:fXax6PqkCbAia476s4UEKZz+agneKwTAYs8ZBPBVTyc=
-github.com/abhirockzz/amazon-bedrock-go-inference-params v0.0.0-20231003045841-a5985794d7ae/go.mod h1:r/RT4MKbukdxjMjCA1547QO7SLRP4gpiUjvKqDomPcM=
 github.com/aws/aws-lambda-go v1.37.0 h1:WXkQ/xhIcXZZ2P5ZBEw+bbAKeCEcb5NtiYpSwVVzIXg=
 github.com/aws/aws-lambda-go v1.37.0/go.mod h1:jwFe2KmMsHmffA1X2R09hH6lFzJQxzI8qK17ewzbQMM=
 github.com/aws/aws-sdk-go-v2 v1.17.5/go.mod h1:uzbQtefpm44goOPmdKyAlXSNcwlRgF3ePWVW6EtJvvw=

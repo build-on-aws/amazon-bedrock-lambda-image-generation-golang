@@ -9,7 +9,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/abhirockzz/amazon-bedrock-go-inference-params/stabilityai"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -52,8 +51,8 @@ func handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.AP
 	seed, _ := strconv.Atoi(req.QueryStringParameters["seed"])
 	steps, _ := strconv.Atoi(req.QueryStringParameters["steps"])
 
-	payload := stabilityai.Request{
-		TextPrompts: []stabilityai.TextPrompt{{Text: prompt}},
+	payload := Request{
+		TextPrompts: []TextPrompt{{Text: prompt}},
 		CfgScale:    cfgScaleF,
 		//Seed:        seed,
 		Steps: steps,
@@ -78,7 +77,7 @@ func handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.AP
 		log.Fatal("failed to invoke model: ", err)
 	}
 
-	var resp stabilityai.Response
+	var resp Response
 
 	err = json.Unmarshal(output.Body, &resp)
 
@@ -103,4 +102,25 @@ func handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.AP
 
 func main() {
 	lambda.Start(handler)
+}
+
+type Request struct {
+	TextPrompts []TextPrompt `json:"text_prompts"`
+	CfgScale    float64      `json:"cfg_scale"`
+	Steps       int          `json:"steps"`
+	Seed        int          `json:"seed"`
+}
+
+type TextPrompt struct {
+	Text string `json:"text"`
+}
+
+type Response struct {
+	Result    string     `json:"result"`
+	Artifacts []Artifact `json:"artifacts"`
+}
+
+type Artifact struct {
+	Base64       string `json:"base64"`
+	FinishReason string `json:"finishReason"`
 }
